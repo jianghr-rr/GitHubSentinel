@@ -1,10 +1,13 @@
-# 更新获取器
 import requests
 from datetime import datetime
 
 class UpdateFetcher:
     def __init__(self):
         self.github_api_url = "https://api.github.com"
+        self.headers = {}
+        from config import GITHUB_API_TOKEN
+        if GITHUB_API_TOKEN:
+            self.headers["Authorization"] = f"token {GITHUB_API_TOKEN}"
 
     def fetch_updates(self, repos):
         updates = []
@@ -14,24 +17,28 @@ class UpdateFetcher:
         return updates
 
     def _fetch_repo_updates(self, repo):
-        # 获取仓库的最新动态，例如 commits, issues, pull requests 等
-        url = f"{self.github_api_url}/repos/{repo}/events"
-        response = requests.get(url)
+        # 获取仓库的最新动态（例如 releases, commits, issues 等）
+        url = f"{self.github_api_url}/repos/{repo}/releases"  # 获取 releases 信息
+        response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
-            events = response.json()
-            return self._parse_events(events)
+            releases = response.json()
+            return self._parse_releases(repo, releases)
         else:
+            print(f"Failed to fetch updates for {repo}: {response.status_code}")
             return []
 
-    def _parse_events(self, events):
-        # 解析 GitHub API 返回的事件数据
+    def _parse_releases(self, repo, releases):
+        # 解析 GitHub API 返回的 releases 数据
         updates = []
-        for event in events:
+        for release in releases:
             update = {
-                "repo": event["repo"]["name"],
-                "type": event["type"],
-                "created_at": datetime.strptime(event["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
-                "payload": event["payload"]
+                "repo": repo,
+                "type": "release",
+                "version": release["tag_name"],
+                "created_at": datetime.strptime(release["created_at"], "%Y-%m-%dT%H:%M:%SZ"),
+                "author": release["author"]["login"],
+                "body": release["body"],
+                "url": release["html_url"],
             }
             updates.append(update)
         return updates
