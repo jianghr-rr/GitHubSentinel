@@ -14,3 +14,7 @@ NOTIFICATION_METHODS = []
 
 # GitHub API 令牌（从 .env 文件中读取）
 GITHUB_API_TOKEN = os.getenv("GITHUB_API_TOKEN")
+
+# OpenAI API Key 和 Base URL
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_API_BASE_URL = os.getenv("OPENAI_API_BASE_URL")  # 默认值

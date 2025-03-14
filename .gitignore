@@ -1,2 +1,9 @@
 .env
 github_sentinel_report.txt
+__pycache__/
+
+# 忽略所有 .pyc 文件
+*.pyc
+
+daily_progress
+daily_reports
